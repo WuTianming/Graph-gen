@@ -71,23 +71,33 @@ def Gorder(edges, order = 'out'):
     unvisited = [ i for i in graph_dict.keys() ]
     unvisited.sort(key=lambda x:len(graph_dict[x]), reverse=True)
     q = queue.Queue()
-    visited = []
+    visited = set()
+    visorder = []
 
-    for src in tqdm(unvisited):
+    prog_bar = tqdm(total=len(unvisited))
+    for src in unvisited:
         if src in visited:
             continue
         q.put(src)
+
         while not q.empty():
             src = q.get()
             if src in visited:
                 continue
-            visited.append(src)
+
+            prog_bar.update(1)
+            visited.add(src)
+            visorder.append(src)
+
             dsts = graph_dict.get(src, [])
             for dst in dsts:
+                if dst in visited:
+                    continue
                 q.put(dst)
+    prog_bar.close()
 
     map_dict = {}
-    for index, src in enumerate(visited):
+    for index, src in enumerate(visorder):
         map_dict[src] = index
 
     order_edges = set()
